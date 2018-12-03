@@ -14,7 +14,7 @@ class Places extends Component {
     }
 
     fetchNewPlaces () {
-        let pyrmont = new window.google.maps.LatLng(-33.8665433,151.1956316);
+        let pyrmont = new window.google.maps.LatLng(47.608013,-122.335167);
 
         let map = new window.google.maps.Map(this.refs.map, {
             center: pyrmont,
@@ -35,6 +35,7 @@ class Places extends Component {
         if (status == window.google.maps.places.PlacesServiceStatus.OK) {
             for (var i = 0; i < results.length; i++) {
                 var place = results[i];
+
                 // TODO: If this place_id isn't store in Redux yet, we can call the next API. Otherwise, ignore.
                 var request = {
                     placeId: place.place_id,
@@ -52,7 +53,6 @@ class Places extends Component {
             // More details for this particular place. We'll want to store these in Redux
             // and eventually check to see which are open at the time the user specified 
             // and update the UI (likely using filter)
-            console.log(place);
             this.setState(prevState => ({
                 places: prevState.places.concat([place])
             }));
