@@ -1,3 +1,10 @@
+# Where to go
+This project will show you a heatmap of neighborhoods arounds you where businesses are open at a specified time.
+
+This is great for knowing what neighborhoods to explore at a given time, especially when you're new to the area or on vacation and don't have a particular destination in mind.
+
+------------
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
