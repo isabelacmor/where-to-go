@@ -20,7 +20,7 @@ class App extends Component {
       <div className="App">
         <User onGotUserLocation={this.handleStoreLocation} />
         <span>{this.state.userLocation.latitude}, {this.state.userLocation.longitude}</span>
-        <Places />
+        <Places lat={this.state.userLocation.latitude} long={this.state.userLocation.longitude} />
       </div>
     );
   }

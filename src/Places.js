@@ -9,12 +9,14 @@ class Places extends Component {
         this.processPlace = this.processPlace.bind(this);
     }
 
-    componentDidMount () {
+    // Call our API every time the lat/long changes
+    componentWillUpdate () {
         this.fetchNewPlaces();
     }
 
     fetchNewPlaces () {
-        let pyrmont = new window.google.maps.LatLng(47.608013,-122.335167);
+        console.log(this.props);
+        let pyrmont = new window.google.maps.LatLng(this.props.lat, this.props.long);
 
         let map = new window.google.maps.Map(this.refs.map, {
             center: pyrmont,
@@ -23,7 +25,7 @@ class Places extends Component {
 
         var request = {
             location: pyrmont,
-            radius: '500',
+            radius: '5000',
             type: ['restaurant']
         };
 
@@ -31,7 +33,7 @@ class Places extends Component {
         service.nearbySearch(request, this.processAllPlaces);
     }
 
-    processAllPlaces (results, status) {
+    processAllPlaces (results, status, pagination) {
         if (status == window.google.maps.places.PlacesServiceStatus.OK) {
             for (var i = 0; i < results.length; i++) {
                 var place = results[i];
@@ -45,6 +47,12 @@ class Places extends Component {
                 let service = new window.google.maps.places.PlacesService(this.refs.map);
                 service.getDetails(request, this.processPlace);
             }
+
+            console.log(pagination);
+            // Get more results
+            if (pagination.hasNextPage) {
+                pagination.nextPage();
+            }
         }
     }
 
@@ -53,6 +61,8 @@ class Places extends Component {
             // More details for this particular place. We'll want to store these in Redux
             // and eventually check to see which are open at the time the user specified 
             // and update the UI (likely using filter)
+
+            // TODO: BUG: don't have multiples. Figure out how to get place_id from processAllPlaces call in here to check
             this.setState(prevState => ({
                 places: prevState.places.concat([place])
             }));
