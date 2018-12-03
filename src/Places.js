@@ -1,5 +1,4 @@
 import React, {Component} from 'react';
-import secrets from './secrets.json';
 
 class Places extends Component {
     constructor() {
@@ -9,19 +8,18 @@ class Places extends Component {
         this.processPlace = this.processPlace.bind(this);
     }
 
-    // Call our API every time the lat/long changes
-    componentWillUpdate () {
+    // Call our API every time this.state.userLocation changes
+    componentDidUpdate () {
         this.fetchNewPlaces();
     }
 
     fetchNewPlaces () {
-        console.log(this.props);
         let pyrmont = new window.google.maps.LatLng(this.props.lat, this.props.long);
 
         let map = new window.google.maps.Map(this.refs.map, {
             center: pyrmont,
             zoom: 15
-            });
+        });
 
         var request = {
             location: pyrmont,
@@ -34,22 +32,23 @@ class Places extends Component {
     }
 
     processAllPlaces (results, status, pagination) {
-        if (status == window.google.maps.places.PlacesServiceStatus.OK) {
+        if (status === window.google.maps.places.PlacesServiceStatus.OK) {
             for (var i = 0; i < results.length; i++) {
                 var place = results[i];
 
                 // TODO: If this place_id isn't store in Redux yet, we can call the next API. Otherwise, ignore.
                 var request = {
                     placeId: place.place_id,
-                    fields: ['name', 'rating', 'formatted_phone_number', 'geometry', 'opening_hours']
+                    fields: ['name', 'rating', 'formatted_phone_number', 'geometry', 'opening_hours', 'place_id']
                 };
                 
                 let service = new window.google.maps.places.PlacesService(this.refs.map);
                 service.getDetails(request, this.processPlace);
             }
 
-            console.log(pagination);
             // Get more results
+            console.log(pagination);
+            // TODO: uncomment for prod; commented in dev to reduce API calls
             if (pagination.hasNextPage) {
                 pagination.nextPage();
             }
@@ -57,15 +56,34 @@ class Places extends Component {
     }
 
     processPlace (place, status) {
-        if (status == window.google.maps.places.PlacesServiceStatus.OK) {
+        if (status === window.google.maps.places.PlacesServiceStatus.OK) {
             // More details for this particular place. We'll want to store these in Redux
             // and eventually check to see which are open at the time the user specified 
             // and update the UI (likely using filter)
 
+            console.log(place);
+
             // TODO: BUG: don't have multiples. Figure out how to get place_id from processAllPlaces call in here to check
-            this.setState(prevState => ({
-                places: prevState.places.concat([place])
-            }));
+            this.setState(prevState => {
+                let exists = false;
+                let temp = prevState.places;
+
+                // Make sure we don't add a place that already exists in our state
+                for (let i = 0; i < temp.length; i++) {
+                    if (temp[i].place_id === place.place_id) {
+                        exists = true;
+                        break;
+                    }
+                }
+                
+                if (!exists) {
+                    temp = temp.concat([place]);
+                }
+
+                return {
+                    places: temp
+                }
+            });
         }
     }
 

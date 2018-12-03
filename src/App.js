@@ -7,12 +7,17 @@ class App extends Component {
   constructor () {
     super();
 
-    this.state = { userLocation: {}};
+    this.state = { userLocation: { }};
     this.handleStoreLocation = this.handleStoreLocation.bind(this);
   }
 
   handleStoreLocation (position) {
-    this.setState({ userLocation : position.coords });
+    // Only update state if the location has actually changed to prevent refetching data from API
+    if (this.state.userLocation.latitude !== position.coords.latitude || this.state.userLocation.longitude !== position.coords.longitude) {
+      this.setState({ userLocation : {latitude: position.coords.latitude, longitude: position.coords.longitude }});
+    } else {
+      console.log("lat/long hasn't changed");
+    }
   }
 
   render () {
