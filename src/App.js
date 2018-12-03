@@ -1,14 +1,18 @@
 import React, { Component } from 'react';
 import './App.css';
-import Places from './Places';
 import User from './User';
+import ListOfPlaces from './ListOfPlaces';
 
 class App extends Component {
   constructor () {
     super();
 
-    this.state = { userLocation: { }};
+    this.state = { userLocation: { }, radius: '5000', places: [] };
     this.handleStoreLocation = this.handleStoreLocation.bind(this);
+    this.handleUpdateRadius = this.handleUpdateRadius.bind(this);
+    this.handleUpdatePlaces = this.handleUpdatePlaces.bind(this);
+
+    this.placesComponent = React.createRef();
   }
 
   handleStoreLocation (position) {
@@ -20,12 +24,51 @@ class App extends Component {
     }
   }
 
+  handleUpdateRadius (r) {
+    this.setState({ radius: r, places: [] }, () => {
+      // Now that the places array has been cleared, fetch the new data and store
+      this.placesComponent.current.fetchNewPlaces();
+    });
+  }
+
+  handleUpdatePlaces (place) {
+    // Update state as long as it doesn't already contain this place.
+    // Drawback: this place's info might change. Consider replacing the existing item if found.
+    this.setState(prevState => {
+        let exists = false;
+        let temp = prevState.places;
+
+        // Make sure we don't add a place that already exists in our state
+        for (let i = 0; i < temp.length; i++) {
+            if (temp[i].place_id === place.place_id) {
+                exists = true;
+                break;
+            }
+        }
+        
+        if (!exists) {
+            temp = temp.concat([place]);
+        }
+
+        return {
+            places: temp
+        }
+    });
+  }
+
   render () {
     return (
       <div className="App">
         <User onGotUserLocation={this.handleStoreLocation} />
         <span>{this.state.userLocation.latitude}, {this.state.userLocation.longitude}</span>
-        <Places lat={this.state.userLocation.latitude} long={this.state.userLocation.longitude} />
+        <ListOfPlaces 
+          ref={this.placesComponent} 
+          onGotRadiusChange={this.handleUpdateRadius} 
+          onGotNewPlaces={this.handleUpdatePlaces} 
+          places={this.state.places} 
+          lat={this.state.userLocation.latitude} 
+          long={this.state.userLocation.longitude} 
+          radius={this.state.radius} />
       </div>
     );
   }
