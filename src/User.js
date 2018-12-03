@@ -16,7 +16,6 @@ class User extends Component {
     }
 
     updateLocation (position) {
-        console.log(position);
         this.props.onGotUserLocation(position);
     }
 

@@ -47,11 +47,10 @@ class Places extends Component {
             }
 
             // Get more results
-            console.log(pagination);
             // TODO: uncomment for prod; commented in dev to reduce API calls
-            if (pagination.hasNextPage) {
-                pagination.nextPage();
-            }
+            // if (pagination.hasNextPage) {
+            //     pagination.nextPage();
+            // }
         }
     }
 
@@ -61,9 +60,8 @@ class Places extends Component {
             // and eventually check to see which are open at the time the user specified 
             // and update the UI (likely using filter)
 
-            console.log(place);
-
-            // TODO: BUG: don't have multiples. Figure out how to get place_id from processAllPlaces call in here to check
+            // Update state as long as it doesn't already contain this place.
+            // Drawback: this place's info might change. Consider replacing the existing item if found.
             this.setState(prevState => {
                 let exists = false;
                 let temp = prevState.places;
