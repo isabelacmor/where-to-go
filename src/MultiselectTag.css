@@ -1,0 +1,32 @@
+.checkboxOption {
+    float: left;
+}
+
+.select-list {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.select-item input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+}
+
+.select-item {
+    background-color: #ebebeb !important;
+    border-radius: 3px;
+    margin: 3px;
+}
+
+.select-item:hover {
+    background-color: #cacaca !important;
+}
+
+.select-item[aria-selected=true] {
+    background-color: rgb(114, 234, 243) !important;
+  }

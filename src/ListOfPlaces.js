@@ -1,4 +1,8 @@
-import React, {PureComponent, Fragment} from 'react';
+import React, {PureComponent} from 'react';
+import InputRange from 'react-input-range';
+import 'react-input-range/lib/css/index.css';
+import './ListOfPlaces.css';
+import MultiselectTags from './MultiselectTags';
 
 // PureComponents only rerender if at least one state or prop value changes.
 // Change is determined by doing a shallow comparison of state and prop keys.
@@ -6,12 +10,15 @@ class ListOfPlaces extends PureComponent {
     constructor() {
         super();
 
+        this.state = { sliderRadiusValue: 1000 };
+
         this.processAllPlaces = this.processAllPlaces.bind(this);
         this.processPlace = this.processPlace.bind(this);
     }
 
-    handleRadiusChange = event => {
-        this.props.onGotRadiusChange(event.target.value);
+    handleRadiusChange = v => {
+        this.props.onGotRadiusChange(this.state.sliderRadiusValue);
+        console.log("released at " + this.state.sliderRadiusValue);
     };
 
     fetchNewPlaces () {
@@ -82,12 +89,33 @@ class ListOfPlaces extends PureComponent {
     // )
 
     return (
-        <Fragment>
+        <div id="placesContainer">
             <div id="map" ref="map"></div>
-            <input onChange={this.handleRadiusChange} value={this.props.radius} />
+            <div id="inputRangeContainer">
+                <InputRange
+                    formatLabel={sliderRadiusValue => `${sliderRadiusValue}m`}
+                    maxValue={50000}
+                    minValue={1000}
+                    step={1000}
+                    value={this.state.sliderRadiusValue}
+                    onChange={sliderRadiusValue => this.setState({ sliderRadiusValue })}
+                    onChangeComplete={this.handleRadiusChange} />
+                <InputRange
+                    formatLabel={sliderRadiusValue => `${sliderRadiusValue}m`}
+                    maxValue={50000}
+                    minValue={1000}
+                    step={1000}
+                    value={this.state.sliderRadiusValue}
+                    onChange={sliderRadiusValue => this.setState({ sliderRadiusValue })}
+                    onChangeComplete={this.handleRadiusChange} />
+            </div>
             {/* <ul>{filteredList.map(item => <li key={item.place_id}>{item.name}</li>)}</ul> */}
+
+            <MultiselectTags />
+
+
             <ul>{this.props.places.map(item => <li key={item.place_id}>{item.name}</li>)}</ul>
-        </Fragment>
+        </div>
     );
     }
 }

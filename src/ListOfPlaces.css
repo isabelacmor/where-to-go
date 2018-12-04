@@ -1,0 +1,18 @@
+#placesContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+#inputRangeContainer{
+    display: flex;
+    justify-content: center;
+}
+
+#inputRangeContainer .input-range {
+    width: 300px;
+}
+
+#inputRangeContainer .input-range:first-of-type {
+    margin-right: 50px;
+}
