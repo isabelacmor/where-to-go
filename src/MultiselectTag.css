@@ -1,5 +1,5 @@
-.checkboxOption {
-    float: left;
+.multi-select {
+    min-width: 350px;
 }
 
 .select-list {
@@ -29,4 +29,4 @@
 
 .select-item[aria-selected=true] {
     background-color: rgb(114, 234, 243) !important;
-  }
+}

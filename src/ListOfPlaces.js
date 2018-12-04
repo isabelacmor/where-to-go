@@ -100,19 +100,9 @@ class ListOfPlaces extends PureComponent {
                     value={this.state.sliderRadiusValue}
                     onChange={sliderRadiusValue => this.setState({ sliderRadiusValue })}
                     onChangeComplete={this.handleRadiusChange} />
-                <InputRange
-                    formatLabel={sliderRadiusValue => `${sliderRadiusValue}m`}
-                    maxValue={50000}
-                    minValue={1000}
-                    step={1000}
-                    value={this.state.sliderRadiusValue}
-                    onChange={sliderRadiusValue => this.setState({ sliderRadiusValue })}
-                    onChangeComplete={this.handleRadiusChange} />
+                <MultiselectTags />
             </div>
             {/* <ul>{filteredList.map(item => <li key={item.place_id}>{item.name}</li>)}</ul> */}
-
-            <MultiselectTags />
-
 
             <ul>{this.props.places.map(item => <li key={item.place_id}>{item.name}</li>)}</ul>
         </div>

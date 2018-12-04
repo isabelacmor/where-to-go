@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import MultiSelect from '@khanacademy/react-multi-select';
 import './MultiselectTag.css';
 
+// TODO: potentially pull this out into a separate file
+// TODO: reshape this data
 const options = [
     { value: 1, label: "Restaurants", code: "restaurant" },
     { value: 2, label: "Points of interest", code: "point_of_interest" },
