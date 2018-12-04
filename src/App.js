@@ -7,7 +7,7 @@ class App extends Component {
   constructor () {
     super();
 
-    this.state = { userLocation: { }, radius: '5000', places: [] };
+    this.state = { userLocation: { }, radius: '8000', places: [] };
     this.handleStoreLocation = this.handleStoreLocation.bind(this);
     this.handleUpdateRadius = this.handleUpdateRadius.bind(this);
     this.handleUpdatePlaces = this.handleUpdatePlaces.bind(this);

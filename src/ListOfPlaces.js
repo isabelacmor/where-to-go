@@ -16,6 +16,11 @@ class ListOfPlaces extends PureComponent {
         this.processPlace = this.processPlace.bind(this);
     }
 
+    componentDidMount () {
+        this.setState({ sliderRadiusValue: parseInt(this.props.radius) });
+        this.fetchNewPlaces();
+    }
+
     handleRadiusChange = v => {
         this.props.onGotRadiusChange(this.state.sliderRadiusValue);
         console.log("released at " + this.state.sliderRadiusValue);
