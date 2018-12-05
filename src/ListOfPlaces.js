@@ -3,6 +3,8 @@ import InputRange from 'react-input-range';
 import 'react-input-range/lib/css/index.css';
 import './ListOfPlaces.css';
 import MultiselectTags from './MultiselectTags';
+import TypesEnum from './placetypes';
+import CodesEnum from './codetypes';
 
 // PureComponents only rerender if at least one state or prop value changes.
 // Change is determined by doing a shallow comparison of state and prop keys.
@@ -14,6 +16,7 @@ class ListOfPlaces extends PureComponent {
 
         this.processAllPlaces = this.processAllPlaces.bind(this);
         this.processPlace = this.processPlace.bind(this);
+        this.handleTypeOfPlacesChanged = this.handleTypeOfPlacesChanged.bind(this);
     }
 
     componentDidMount () {
@@ -23,10 +26,10 @@ class ListOfPlaces extends PureComponent {
 
     handleRadiusChange = v => {
         this.props.onGotRadiusChange(this.state.sliderRadiusValue);
-        console.log("released at " + this.state.sliderRadiusValue);
     };
 
     fetchNewPlaces () {
+        console.log("fetchNewPlaces");
         let pyrmont = new window.google.maps.LatLng(this.props.lat, this.props.long);
         let map = new window.google.maps.Map(this.refs.map, {
             center: pyrmont,
@@ -36,18 +39,35 @@ class ListOfPlaces extends PureComponent {
         var request = {
             location: pyrmont,
             radius: this.props.radius,
-            type: ['restaurant']
+            type: this.convertToStringTypes()  // convert typesOfPlaces here from value to string
         };
+
+        console.log(request);
 
         let service = new window.google.maps.places.PlacesService(map);
         service.nearbySearch(request, this.processAllPlaces);
+    }
+    
+    convertToStringTypes() {
+        console.log("convertToStringTypes");
+        let stringRes = [];
+        let codeRes = [];
+
+        this.props.typesOfPlaces.forEach(type => {
+            stringRes = stringRes.concat(Object.keys(TypesEnum).filter(key => TypesEnum[key] === type));
+        });
+
+        stringRes.forEach(s => {
+            codeRes = codeRes.concat(CodesEnum[s]);
+        });
+
+        return codeRes;
     }
 
     processAllPlaces (results, status, pagination) {
         console.log(status);
         console.log(results);
         if (status === window.google.maps.places.PlacesServiceStatus.OK) {
-            console.log();
             for (var i = 0; i < results.length; i++) {
                 var place = results[i];
 
@@ -57,13 +77,17 @@ class ListOfPlaces extends PureComponent {
                     fields: ['name', 'rating', 'formatted_phone_number', 'geometry', 'opening_hours', 'place_id']
                 };
 
-                // let exists = this.props.places.filter((item, place) => item.place_id === place.place_id);
+                // eslint-disable-next-line no-loop-func
+                let exists = this.props.places.filter(item => {
+                    return item.place_id === place.place_id;
+                });
                 
                 // Process request if the item doesn't already exist
-                // if (exists.length === 0) {
+                if (exists.length === 0) {
+                    console.log(place.name + " doesn't exist yet... go fetch");
                     let service = new window.google.maps.places.PlacesService(this.refs.map);
                     service.getDetails(request, this.processPlace);
-                // }
+                }
             }
 
             // Get more results
@@ -75,11 +99,31 @@ class ListOfPlaces extends PureComponent {
     }
 
     processPlace (place, status) {
-        console.log(status);
         if (status === window.google.maps.places.PlacesServiceStatus.OK) {
             this.props.onGotNewPlaces(place);
-            console.log(place);
         }
+    }
+
+    getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
+        var R = 6371; // Radius of the earth in km
+        var dLat = this.deg2rad(lat2-lat1);  // deg2rad below
+        var dLon = this.deg2rad(lon2-lon1); 
+        var a = 
+          Math.sin(dLat/2) * Math.sin(dLat/2) +
+          Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) * 
+          Math.sin(dLon/2) * Math.sin(dLon/2)
+        ; 
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+        var d = R * c; // Distance in km
+        return d;
+    }
+
+    deg2rad(deg) {
+        return deg * (Math.PI/180);
+    }
+
+    handleTypeOfPlacesChanged(selectedOptions) {
+        this.props.onGotNewTypesOfPlaces(selectedOptions);
     }
 
     render() {
@@ -89,9 +133,12 @@ class ListOfPlaces extends PureComponent {
     //     item => item.name.includes(this.state.filterRadius)
     // )
 
-    // const filteredList = this.props.places.filter(
-    //     item => item.name.includes(this.state.filterTypes)
-    // )
+    const filteredList = this.props.places.filter(
+        item => { 
+            let withinRadius = (this.props.radius * 0.001) >= this.getDistanceFromLatLonInKm(item.geometry.location.lat(), item.geometry.location.lng(), this.props.userLocation.latitude, this.props.userLocation.longitude);
+            return withinRadius;
+        }
+    )
 
     return (
         <div id="placesContainer">
@@ -105,11 +152,13 @@ class ListOfPlaces extends PureComponent {
                     value={this.state.sliderRadiusValue}
                     onChange={sliderRadiusValue => this.setState({ sliderRadiusValue })}
                     onChangeComplete={this.handleRadiusChange} />
-                <MultiselectTags />
+                <MultiselectTags 
+                    onTypeOfPlacesChanged={this.handleTypeOfPlacesChanged}
+                    typesOfPlaces={this.props.typesOfPlaces} />
             </div>
-            {/* <ul>{filteredList.map(item => <li key={item.place_id}>{item.name}</li>)}</ul> */}
+            <ul>{filteredList.map(item => <li key={item.place_id}>{item.name}</li>)}</ul>
 
-            <ul>{this.props.places.map(item => <li key={item.place_id}>{item.name}</li>)}</ul>
+            {/* <ul>{this.props.places.map(item => <li key={item.place_id}>{item.name}</li>)}</ul> */}
         </div>
     );
     }

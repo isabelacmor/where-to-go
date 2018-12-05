@@ -5,22 +5,21 @@ import './MultiselectTag.css';
 // TODO: potentially pull this out into a separate file
 // TODO: reshape this data
 const options = [
-    { value: 1, label: "Restaurants", code: "restaurant" },
-    { value: 2, label: "Points of interest", code: "point_of_interest" },
-    { value: 3, label: "Bars", code: "bar" },
-    { value: 4, label: "Clubs", code: "night_club" },
-    { value: 5, label: "Shops" },
-    { value: 6, label: "Aquariums", code: "aquarium" },
-    { value: 7, label: "Amusement parks", code: "amusement_park" },
-    { value: 8, label: "Art galleries", code: "art_gallery" },
-    { value: 9, label: "Bakeries", code: "bakery" },
-    { value: 10, label: "Cafes", code: "cafe" },
-    { value: 11, label: "Bookstores", code: "book_store" },
-    { value: 12, label: "Casinos", code: "casino" },
-    { value: 13, label: "Stores", code: "clothing_store,convenience_store,department_store,electronics_store,home_goods_store,jewelry_store,pet_store,shopping_mall,shoe_store,store" },
-    { value: 14, label: "Museums", code: "museum" },
-    { value: 15, label: "Zoos", code: "zoo" },
-    { value: 16, label: "Nature", code: "natural_feature" },
+    { value: 1, label: "Restaurants", code: ["restaurant"] },
+    { value: 2, label: "Points of interest", code: ["point_of_interest"]},
+    { value: 3, label: "Bars", code: ["bar"] },
+    { value: 4, label: "Clubs", code: ["night_club"] },
+    { value: 5, label: "Aquariums", code: ["aquarium"] },
+    { value: 6, label: "Amusement parks", code: ["amusement_park"] },
+    { value: 7, label: "Art galleries", code: ["art_gallery"] },
+    { value: 8, label: "Bakeries", code: ["bakery"] },
+    { value: 9, label: "Cafes", code: ["cafe"] },
+    { value: 10, label: "Bookstores", code: ["book_store"] },
+    { value: 11, label: "Casinos", code: ["casino"] },
+    { value: 12, label: "Stores", code: ["clothing_store", "convenience_store", "department_store", "electronics_store", "home_goods_store", "jewelry_store", "pet_store", "shopping_mall", "shoe_store", "store"] },
+    { value: 13, label: "Museums", code: ["museum"] },
+    { value: 14, label: "Zoos", code: ["zoo"] },
+    { value: 15, label: "Nature", code: ["natural_feature"] },
 ];
 
 const styles = {
@@ -36,12 +35,18 @@ const styles = {
 };
 
 class MultiselectTags extends Component {
-    state = {
-        selectedOptions: [],
+    constructor (props) {
+        super(props);
+
+        this.state = {
+            selectedOptions: this.props.typesOfPlaces
+        };
     }
 
     handleSelectedChanged = (selectedOptions) => (
-        this.setState({ selectedOptions })
+        this.setState({ selectedOptions }, () => {
+            this.props.onTypeOfPlacesChanged(selectedOptions);
+        })
     )
 
     handleUnselectItem = (removedVal) => () => (

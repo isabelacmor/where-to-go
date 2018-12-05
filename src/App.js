@@ -2,15 +2,17 @@ import React, { Component } from 'react';
 import './App.css';
 import User from './User';
 import ListOfPlaces from './ListOfPlaces';
+import TypesEnum from './placetypes';
 
 class App extends Component {
   constructor () {
     super();
 
-    this.state = { userLocation: { }, radius: '8000', places: [] };
+    this.state = { userLocation: { }, radius: '8000', places: [], typesOfPlaces: [TypesEnum.Restaurants] };
     this.handleStoreLocation = this.handleStoreLocation.bind(this);
     this.handleUpdateRadius = this.handleUpdateRadius.bind(this);
     this.handleUpdatePlaces = this.handleUpdatePlaces.bind(this);
+    this.handleUpdateTypesOfPlaces = this.handleUpdateTypesOfPlaces.bind(this);
 
     this.placesComponent = React.createRef();
   }
@@ -25,8 +27,9 @@ class App extends Component {
   }
 
   handleUpdateRadius (r) {
-    this.setState({ radius: r, places: [] }, () => {
+    this.setState({ radius: r }, () => {
       // Now that the places array has been cleared, fetch the new data and store
+      console.log("call fetchNewPlaces");
       this.placesComponent.current.fetchNewPlaces();
     });
   }
@@ -56,6 +59,10 @@ class App extends Component {
     });
   }
 
+  handleUpdateTypesOfPlaces (types) {
+    this.setState({ typesOfPlaces : types });
+  }
+
   render () {
     return (
       <div className="App">
@@ -64,11 +71,14 @@ class App extends Component {
         <ListOfPlaces 
           ref={this.placesComponent} 
           onGotRadiusChange={this.handleUpdateRadius} 
-          onGotNewPlaces={this.handleUpdatePlaces} 
+          onGotNewPlaces={this.handleUpdatePlaces}
+          onGotNewTypesOfPlaces={this.handleUpdateTypesOfPlaces}
           places={this.state.places} 
           lat={this.state.userLocation.latitude} 
           long={this.state.userLocation.longitude} 
-          radius={this.state.radius} />
+          radius={this.state.radius}
+          userLocation={this.state.userLocation}
+          typesOfPlaces={this.state.typesOfPlaces} />
       </div>
     );
   }
