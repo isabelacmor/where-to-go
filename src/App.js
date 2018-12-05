@@ -8,11 +8,12 @@ class App extends Component {
   constructor () {
     super();
 
-    this.state = { userLocation: { }, radius: '8000', places: [], typesOfPlaces: [TypesEnum.Restaurants] };
+    this.state = { userLocation: { }, radius: '8000', places: [], typesOfPlaces: [TypesEnum.Restaurants], closeTime: "0000" };
     this.handleStoreLocation = this.handleStoreLocation.bind(this);
     this.handleUpdateRadius = this.handleUpdateRadius.bind(this);
     this.handleUpdatePlaces = this.handleUpdatePlaces.bind(this);
     this.handleUpdateTypesOfPlaces = this.handleUpdateTypesOfPlaces.bind(this);
+    this.handleUpdateCloseTime = this.handleUpdateCloseTime.bind(this);
 
     this.placesComponent = React.createRef();
   }
@@ -64,6 +65,10 @@ class App extends Component {
     });
   }
 
+  handleUpdateCloseTime (time) {
+    this.setState({ closeTime: time});
+  }
+
   render () {
     return (
       <div className="App">
@@ -74,12 +79,14 @@ class App extends Component {
           onGotRadiusChange={this.handleUpdateRadius} 
           onGotNewPlaces={this.handleUpdatePlaces}
           onGotNewTypesOfPlaces={this.handleUpdateTypesOfPlaces}
+          onGotNewCloseTime={this.handleUpdateCloseTime}
           places={this.state.places} 
           lat={this.state.userLocation.latitude} 
           long={this.state.userLocation.longitude} 
           radius={this.state.radius}
           userLocation={this.state.userLocation}
-          typesOfPlaces={this.state.typesOfPlaces} />
+          typesOfPlaces={this.state.typesOfPlaces}
+          closeTime={this.state.closeTime} />
       </div>
     );
   }
