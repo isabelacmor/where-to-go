@@ -29,7 +29,6 @@ class ListOfPlaces extends PureComponent {
     };
 
     fetchNewPlaces () {
-        console.log("fetchNewPlaces");
         let pyrmont = new window.google.maps.LatLng(this.props.lat, this.props.long);
         let map = new window.google.maps.Map(this.refs.map, {
             center: pyrmont,
@@ -39,21 +38,21 @@ class ListOfPlaces extends PureComponent {
         var request = {
             location: pyrmont,
             radius: this.props.radius,
-            type: this.convertToStringTypes()  // convert typesOfPlaces here from value to string
+            type: this.convertToStringTypes(this.props.typesOfPlaces)  // convert typesOfPlaces here from value to string
         };
 
+        console.log("REQUEST");
         console.log(request);
 
         let service = new window.google.maps.places.PlacesService(map);
         service.nearbySearch(request, this.processAllPlaces);
     }
     
-    convertToStringTypes() {
-        console.log("convertToStringTypes");
+    convertToStringTypes(typesByValue) {
         let stringRes = [];
         let codeRes = [];
 
-        this.props.typesOfPlaces.forEach(type => {
+        typesByValue.forEach(type => {
             stringRes = stringRes.concat(Object.keys(TypesEnum).filter(key => TypesEnum[key] === type));
         });
 
@@ -74,7 +73,7 @@ class ListOfPlaces extends PureComponent {
                 // TODO: If this place_id isn't store in Redux yet, we can call the next API. Otherwise, ignore.
                 var request = {
                     placeId: place.place_id,
-                    fields: ['name', 'rating', 'formatted_phone_number', 'geometry', 'opening_hours', 'place_id']
+                    fields: ['name', 'rating', 'formatted_phone_number', 'geometry', 'opening_hours', 'place_id', 'types']
                 };
 
                 // eslint-disable-next-line no-loop-func
@@ -126,17 +125,33 @@ class ListOfPlaces extends PureComponent {
         this.props.onGotNewTypesOfPlaces(selectedOptions);
     }
 
+    doesTypeMatch(list1, list2) {
+        console.log(list1);
+        console.log("vs");
+        console.log(list2);
+        
+        let newList = this.convertToStringTypes(list2);
+        let found = false;
+        list1.forEach(type => {
+            if (newList.indexOf(type) !== -1) {
+                found =  true;
+            }
+        });
+
+        return found;
+    }
+
     render() {
     // The render method on this PureComponent is called only if
-    // props.list or state.filterRadius has changed.
-    // const filteredList = this.props.places.filter(
-    //     item => item.name.includes(this.state.filterRadius)
-    // )
+    // props.places or state.filterRadius has changed.
 
     const filteredList = this.props.places.filter(
         item => { 
+            console.log(item);
             let withinRadius = (this.props.radius * 0.001) >= this.getDistanceFromLatLonInKm(item.geometry.location.lat(), item.geometry.location.lng(), this.props.userLocation.latitude, this.props.userLocation.longitude);
-            return withinRadius;
+            let matchingType = this.doesTypeMatch(item.types, this.props.typesOfPlaces);
+            console.log(matchingType);
+            return withinRadius && matchingType;
         }
     )
 

@@ -29,7 +29,6 @@ class App extends Component {
   handleUpdateRadius (r) {
     this.setState({ radius: r }, () => {
       // Now that the places array has been cleared, fetch the new data and store
-      console.log("call fetchNewPlaces");
       this.placesComponent.current.fetchNewPlaces();
     });
   }
@@ -60,7 +59,9 @@ class App extends Component {
   }
 
   handleUpdateTypesOfPlaces (types) {
-    this.setState({ typesOfPlaces : types });
+    this.setState({ typesOfPlaces : types }, () => {
+      this.placesComponent.current.fetchNewPlaces();
+    });
   }
 
   render () {
