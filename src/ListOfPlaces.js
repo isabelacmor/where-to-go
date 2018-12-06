@@ -5,7 +5,6 @@ import './ListOfPlaces.css';
 import MultiselectTags from './MultiselectTags';
 import TypesEnum from './placetypes';
 import CodesEnum from './codetypes';
-import FormControl from 'react-bootstrap/lib/FormControl';
 import TimePicker from 'react-bootstrap-time-picker';
 
 // PureComponents only rerender if at least one state or prop value changes.
@@ -101,9 +100,13 @@ class ListOfPlaces extends PureComponent {
     }
 
     processPlace (place, status) {
+        console.log(status);
         if (status === window.google.maps.places.PlacesServiceStatus.OK) {
             this.props.onGotNewPlaces(place);
         }
+
+        // If the state is OVER_QUERY_LIMIT, add the place ID to a Set and have
+        // a function on a set timeout for every 1000ms to retry automatically
     }
 
     getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
@@ -128,11 +131,7 @@ class ListOfPlaces extends PureComponent {
         this.props.onGotNewTypesOfPlaces(selectedOptions);
     }
 
-    doesTypeMatch(list1, list2) {
-        console.log(list1);
-        console.log("vs");
-        console.log(list2);
-        
+    doesTypeMatch(list1, list2) {      
         let newList = this.convertToStringTypes(list2);
         let found = false;
         list1.forEach(type => {
@@ -146,31 +145,33 @@ class ListOfPlaces extends PureComponent {
 
     handleTimeChange (time) {
         this.setState({time : time});
-        let hour = this.pad(2, Math.floor(time/60/60));
-        let minute = this.pad(2, (time/60) % 60);
-        console.log(hour + "" + minute);
-        this.props.onGotNewCloseTime(time);
+        this.props.onGotNewCloseTime({ hours : Math.floor(time/60/60), minutes : (time/60) % 60 });
     }
 
-    pad = function(size, num) {
-        var s = String(num);
-        while (s.length < (size || 2)) {s = "0" + s;}
-        return s;
-    }
+    timeInRange (allHours) {
+        window['moment-range'].extendMoment(window.moment);
+        let currentDay = new Date();
+        let openTime = new Date();
+        let closeTime = new Date();
+        let todayHours = undefined;
 
-    timeInRange (allHours, curHour) {
-        let currentDay = new Date().getDay()-1;
-        console.log("==============================");
-        console.log(allHours);
-        console.log(allHours[currentDay]);
+        // Find the day that corresponds to today
+        // Can't just use the index because some days might be closed, so won't exist in the array
+        allHours.forEach(day => {
+            if ((day.close && day.close.day === currentDay.getDay()) || (day.open && day.open.day === currentDay.getDay()) ) {
+                todayHours = day;
+            }
+        });
 
-        let hour = this.pad(2, Math.floor(curHour/60/60));
-        let minute = this.pad(2, (curHour/60) % 60);
-
-
-        if (allHours[currentDay]) {
-            console.log(allHours[currentDay].open.time + " <= " + parseInt(hour + "" + minute) + " <= " + parseInt(allHours[currentDay].close.time));
-            return parseInt(curHour) >= parseInt(allHours[currentDay].open.time) && parseInt(hour + "" + minute) <= parseInt(allHours[currentDay].close.time);
+        if (todayHours) {
+            currentDay.setHours(this.props.closeTime.hours);
+            currentDay.setMinutes(this.props.closeTime.minutes);
+            openTime.setHours(todayHours.open.hours);
+            openTime.setMinutes(todayHours.open.minutes);
+            closeTime.setHours(todayHours.close.hours);
+            closeTime.setMinutes(todayHours.close.minutes);
+            const range = window.moment.range(openTime, closeTime);
+            return range.contains(currentDay);
         }
 
         return false;
@@ -183,17 +184,13 @@ class ListOfPlaces extends PureComponent {
 
     const filteredList = this.props.places.filter(
         item => { 
-            console.log(item);
             let withinRadius = (this.props.radius * 0.001) >= this.getDistanceFromLatLonInKm(item.geometry.location.lat(), item.geometry.location.lng(), this.props.userLocation.latitude, this.props.userLocation.longitude);
             let matchingType = this.doesTypeMatch(item.types, this.props.typesOfPlaces);
             let matchingCloseTime = true;
             if (item.opening_hours) {
-                console.log(item.opening_hours.periods)
-                console.log(this.props.closeTime);
-                matchingCloseTime = this.timeInRange(item.opening_hours.periods, this.props.closeTime);
+                matchingCloseTime = this.timeInRange(item.opening_hours.periods);
                 
             }
-            console.log(matchingCloseTime);
             return withinRadius && matchingType && matchingCloseTime;
         }
     )

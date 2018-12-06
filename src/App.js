@@ -8,7 +8,7 @@ class App extends Component {
   constructor () {
     super();
 
-    this.state = { userLocation: { }, radius: '8000', places: [], typesOfPlaces: [TypesEnum.Restaurants], closeTime: "0000" };
+    this.state = { userLocation: { }, radius: '8000', places: [], typesOfPlaces: [TypesEnum.Restaurants], closeTime: { hours : 0, minutes : 0} };
     this.handleStoreLocation = this.handleStoreLocation.bind(this);
     this.handleUpdateRadius = this.handleUpdateRadius.bind(this);
     this.handleUpdatePlaces = this.handleUpdatePlaces.bind(this);
@@ -67,6 +67,10 @@ class App extends Component {
 
   handleUpdateCloseTime (time) {
     this.setState({ closeTime: time});
+  }
+
+  convertTimeToString() {
+    return this.state.closeTime.hours + ":" + this.state.closeTime.minutes;
   }
 
   render () {
