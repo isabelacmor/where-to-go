@@ -3,12 +3,16 @@ import './App.css';
 import User from './User';
 import ListOfPlaces from './ListOfPlaces';
 import TypesEnum from './placetypes';
+import RadiusInput from './RadiusInput';
+import TimeInput from './TimeInput';
+import MultiselectTags from './MultiselectTags';
+import './ListOfPlaces.css';
 
 class App extends Component {
   constructor () {
     super();
 
-    this.state = { userLocation: { }, radius: '8000', places: [], typesOfPlaces: [TypesEnum.Restaurants], closeTime: { hours : 0, minutes : 0} };
+    this.state = { userLocation: { }, radius: '8000', places: [], typesOfPlaces: [TypesEnum.Restaurants], closeTime: { hours : 16, minutes : 0} };
     this.handleStoreLocation = this.handleStoreLocation.bind(this);
     this.handleUpdateRadius = this.handleUpdateRadius.bind(this);
     this.handleUpdatePlaces = this.handleUpdatePlaces.bind(this);
@@ -30,7 +34,7 @@ class App extends Component {
   handleUpdateRadius (r) {
     this.setState({ radius: r }, () => {
       // Now that the places array has been cleared, fetch the new data and store
-      this.placesComponent.current.fetchNewPlaces();
+      // this.placesComponent.current.fetchNewPlaces();
     });
   }
 
@@ -61,7 +65,7 @@ class App extends Component {
 
   handleUpdateTypesOfPlaces (types) {
     this.setState({ typesOfPlaces : types }, () => {
-      this.placesComponent.current.fetchNewPlaces();
+      // this.placesComponent.current.fetchNewPlaces();
     });
   }
 
@@ -78,12 +82,20 @@ class App extends Component {
       <div className="App">
         <User onGotUserLocation={this.handleStoreLocation} />
         <span>{this.state.userLocation.latitude}, {this.state.userLocation.longitude}</span>
+        <div id="inputRangeContainer">
+          <RadiusInput 
+            onGotRadiusChange={this.handleUpdateRadius}
+            radius={this.state.radius} />
+          <TimeInput 
+            onGotNewCloseTime={this.handleUpdateCloseTime} />
+          <MultiselectTags 
+            onTypeOfPlacesChanged={this.handleUpdateTypesOfPlaces}
+            typesOfPlaces={this.state.typesOfPlaces} />
+        </div>
+          
         <ListOfPlaces 
           ref={this.placesComponent} 
-          onGotRadiusChange={this.handleUpdateRadius} 
           onGotNewPlaces={this.handleUpdatePlaces}
-          onGotNewTypesOfPlaces={this.handleUpdateTypesOfPlaces}
-          onGotNewCloseTime={this.handleUpdateCloseTime}
           places={this.state.places} 
           lat={this.state.userLocation.latitude} 
           long={this.state.userLocation.longitude} 

@@ -1,11 +1,6 @@
 import React, {PureComponent} from 'react';
-import InputRange from 'react-input-range';
-import 'react-input-range/lib/css/index.css';
-import './ListOfPlaces.css';
-import MultiselectTags from './MultiselectTags';
 import TypesEnum from './placetypes';
 import CodesEnum from './codetypes';
-import TimePicker from 'react-bootstrap-time-picker';
 
 // PureComponents only rerender if at least one state or prop value changes.
 // Change is determined by doing a shallow comparison of state and prop keys.
@@ -13,22 +8,18 @@ class ListOfPlaces extends PureComponent {
     constructor() {
         super();
 
-        this.state = { sliderRadiusValue: 1000, time: "3600" };
-
         this.processAllPlaces = this.processAllPlaces.bind(this);
         this.processPlace = this.processPlace.bind(this);
-        this.handleTypeOfPlacesChanged = this.handleTypeOfPlacesChanged.bind(this);
-        this.handleTimeChange = this.handleTimeChange.bind(this);
     }
 
     componentDidMount () {
-        this.setState({ sliderRadiusValue: parseInt(this.props.radius) });
         this.fetchNewPlaces();
     }
 
-    handleRadiusChange = v => {
-        this.props.onGotRadiusChange(this.state.sliderRadiusValue);
-    };
+    // Call API with updated request when the props change from App.js
+    componentWillUpdate () {
+        this.fetchNewPlaces();
+    }
 
     fetchNewPlaces () {
         let pyrmont = new window.google.maps.LatLng(this.props.lat, this.props.long);
@@ -42,9 +33,6 @@ class ListOfPlaces extends PureComponent {
             radius: this.props.radius,
             type: this.convertToStringTypes(this.props.typesOfPlaces)  // convert typesOfPlaces here from value to string
         };
-
-        console.log("REQUEST");
-        console.log(request);
 
         let service = new window.google.maps.places.PlacesService(map);
         service.nearbySearch(request, this.processAllPlaces);
@@ -127,10 +115,6 @@ class ListOfPlaces extends PureComponent {
         return deg * (Math.PI/180);
     }
 
-    handleTypeOfPlacesChanged(selectedOptions) {
-        this.props.onGotNewTypesOfPlaces(selectedOptions);
-    }
-
     doesTypeMatch(list1, list2) {      
         let newList = this.convertToStringTypes(list2);
         let found = false;
@@ -143,12 +127,22 @@ class ListOfPlaces extends PureComponent {
         return found;
     }
 
-    handleTimeChange (time) {
-        this.setState({time : time});
-        this.props.onGotNewCloseTime({ hours : Math.floor(time/60/60), minutes : (time/60) % 60 });
-    }
-
     timeInRange (allHours) {
+        // TODO: Handle special case of being open 24 hours
+        // periods:
+        // Array[1]
+        // 0:
+        // {…}
+        // open:
+        // {…}
+        // day:
+        // 0
+        // hours:
+        // 0
+        // minutes:
+        // 0
+        // time:
+        // "0000"
         window['moment-range'].extendMoment(window.moment);
         let currentDay = new Date();
         let openTime = new Date();
@@ -183,7 +177,7 @@ class ListOfPlaces extends PureComponent {
     // props.places or state.filterRadius has changed.
 
     const filteredList = this.props.places.filter(
-        item => { 
+        item => {
             let withinRadius = (this.props.radius * 0.001) >= this.getDistanceFromLatLonInKm(item.geometry.location.lat(), item.geometry.location.lng(), this.props.userLocation.latitude, this.props.userLocation.longitude);
             let matchingType = this.doesTypeMatch(item.types, this.props.typesOfPlaces);
             let matchingCloseTime = true;
@@ -198,25 +192,7 @@ class ListOfPlaces extends PureComponent {
     return (
         <div id="placesContainer">
             <div id="map" ref="map"></div>
-            <div id="inputRangeContainer">
-                <InputRange
-                    formatLabel={sliderRadiusValue => `${sliderRadiusValue}m`}
-                    maxValue={50000}
-                    minValue={1000}
-                    step={1000}
-                    value={this.state.sliderRadiusValue}
-                    onChange={sliderRadiusValue => this.setState({ sliderRadiusValue })}
-                    onChangeComplete={this.handleRadiusChange} />
-                <MultiselectTags 
-                    onTypeOfPlacesChanged={this.handleTypeOfPlacesChanged}
-                    typesOfPlaces={this.props.typesOfPlaces} />
-                <TimePicker step={30}
-                    onChange={this.handleTimeChange}
-                    value={this.state.time} />
-            </div>
             <ul>{filteredList.map(item => <li key={item.place_id}>{item.name}</li>)}</ul>
-
-            {/* <ul>{this.props.places.map(item => <li key={item.place_id}>{item.name}</li>)}</ul> */}
         </div>
     );
     }
