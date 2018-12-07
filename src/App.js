@@ -32,10 +32,7 @@ class App extends Component {
   }
 
   handleUpdateRadius (r) {
-    this.setState({ radius: r }, () => {
-      // Now that the places array has been cleared, fetch the new data and store
-      // this.placesComponent.current.fetchNewPlaces();
-    });
+    this.setState({ radius: r });
   }
 
   handleUpdatePlaces (place) {
@@ -64,24 +61,18 @@ class App extends Component {
   }
 
   handleUpdateTypesOfPlaces (types) {
-    this.setState({ typesOfPlaces : types }, () => {
-      // this.placesComponent.current.fetchNewPlaces();
-    });
+    this.setState({ typesOfPlaces : types });
   }
 
   handleUpdateCloseTime (time) {
-    this.setState({ closeTime: time});
-  }
-
-  convertTimeToString() {
-    return this.state.closeTime.hours + ":" + this.state.closeTime.minutes;
+    this.setState({ closeTime: time });
   }
 
   render () {
     return (
       <div className="App">
         <User onGotUserLocation={this.handleStoreLocation} />
-        <span>{this.state.userLocation.latitude}, {this.state.userLocation.longitude}</span>
+        
         <div id="inputRangeContainer">
           <RadiusInput 
             onGotRadiusChange={this.handleUpdateRadius}

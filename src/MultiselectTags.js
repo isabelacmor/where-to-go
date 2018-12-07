@@ -93,7 +93,7 @@ class MultiselectTags extends Component {
         return (
         <div style={styles.wrapper}>
             {selected.map(value => (
-            <span>{options.find(o => value === o.value).label}, </span>
+            <span key={value}>{options.find(o => value === o.value).label}, </span>
             ))}
         </div>
         )

@@ -9,8 +9,7 @@ class TimeInput extends Component {
         // This logic also rounds to the next hour if the minutes would equal 60
         let now = new Date();
         now.setMinutes(Math.ceil(now.getMinutes() / 30) * 30);
-        console.log(now.getHours() + ":" + now.getMinutes());
-        this.state = { time: "16:30" };
+        this.state = { time: now.getHours() + ":" + now.getMinutes() };
 
         this.handleTimeChange = this.handleTimeChange.bind(this);
     }
